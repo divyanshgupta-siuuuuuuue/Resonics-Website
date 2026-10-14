@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In-SPEAKER | Module: TGG 113 - Start Up Superstars (Class 8A2)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Three.js for 3D Jukebox Canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        amberGold: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        },
+                        techCyan: {
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        tech: ['Orbitron', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #030712;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .glass-header {
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 15px 35px -10px rgba(245, 158, 11, 0.2);
+        }
+
+        .glow-gold {
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.15), inset 0 0 15px rgba(245, 158, 11, 0.05);
+        }
+
+        .bg-grid-pattern {
+            background-size: 50px 50px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #030712; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+
+        #three-canvas-container canvas {
+            outline: none;
+            cursor: grab;
+        }
+        #three-canvas-container canvas:active {
+            cursor: grabbing;
+        }
+
+        /* Preset selector active highlight */
+        .preset-btn.active {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #030712;
+            font-weight: 700;
+            border-color: #fbbf24;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Custom Slider Styling */
+        input[type=range] {
+            accent-color: #f59e0b;
+        }
+
+        /* Toast Container */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-grid-pattern text-slate-100 antialiased selection:bg-amber-500 selection:text-black min-h-screen flex flex-col">
+
+    <!-- Toast Notifications Placeholder -->
+    <div id="toast-container"></div>
+
+    <header class="fixed top-0 left-0 right-0 z-50 glass-header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Brand Info -->
+                <a href="javascript:void(0)" onclick="switchPage('home')" class="flex items-center gap-3 group">
+                    <div class="w-11 h-11 bg-gradient-to-br from-amber-400 via-amber-600 to-amber-700 rounded-xl p-[2px] shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/40 transition-all">
+                        <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid fa-cube text-amber-400 text-xl group-hover:scale-110 transition-transform"></i>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <span class="font-tech text-lg font-black tracking-wider text-white">In-SPEAKER</span>
+                            <span class="bg-amber-500/20 text-amber-400 text-[10px] font-tech px-2 py-0.5 rounded border border-amber-500/30 font-bold">MODULE: TGG 113</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400 font-medium tracking-widest uppercase">Start Up Superstars Project &bull; Class 8A2</span>
+                    </div>
+                </a>
+
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex items-center gap-1 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800">
+                    <button onclick="switchPage('home')" id="nav-home" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-tech font-bold transition-all text-amber-400 bg-slate-800 border border-amber-500/30">
+                        <i class="fa-solid fa-house mr-1.5"></i> Home
+                    </button>
+                    <button onclick="switchPage('advantages')" id="nav-advantages" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-tech font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-list-check mr-1.5"></i> Advantages
+                    </button>
+                    <button onclick="switchPage('mic-arena')" id="nav-mic-arena" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-tech font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/50 relative">
+                        <i class="fa-solid fa-microphone text-amber-400 mr-1.5 animate-pulse"></i> Mic Arena (Studio FX)
+                        <span class="absolute -top-1 -right-1 bg-amber-500 text-slate-950 text-[9px] px-1.5 py-0.2 rounded-full font-bold">PRO TEST</span>
+                    </button>
+                    <button onclick="switchPage('gallery')" id="nav-gallery" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-tech font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/50">
+                        <i class="fa-solid fa-photo-film mr-1.5"></i> Gallery (<span id="saved-count">0</span>)
+                    </button>
+                </nav>
+
+                <!-- Status Badges & Sound Demo Button -->
+                <div class="flex items-center gap-3">
+                    <div class="hidden lg:flex items-center px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-tech font-bold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping mr-2"></span> SSS READY
+                    </div>
+                    <button onclick="toggleAudioDemo()" id="audioBtn" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-tech font-bold text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-amber-500/20">
+                        <i id="audioBtnIcon" class="fa-solid fa-play"></i>
+                        <span id="audioBtnText">SOUND DEMO</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation Bar -->
+            <div class="flex md:hidden items-center justify-around py-2 border-t border-slate-800 text-xs font-tech">
+                <button onclick="switchPage('home')" class="mobile-tab text-amber-400">Home</button>
+                <button onclick="switchPage('advantages')" class="mobile-tab text-slate-400">Advantages</button>
+                <button onclick="switchPage('mic-arena')" class="mobile-tab text-slate-400 font-bold text-amber-400">Mic Arena</button>
+                <button onclick="switchPage('gallery')" class="mobile-tab text-slate-400">Gallery</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow pt-24 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+
+        <!-- PAGE 1: HOME & 3D JUKEBOX SHOWCASE -->
+        <section id="page-home" class="page-content space-y-16 py-8">
+            
+            <!-- Hero Heading -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-card border-amber-500/30 text-amber-400 text-xs font-tech font-bold uppercase tracking-widest">
+                        <i class="fa-solid fa-award"></i> Official SSS Startup Submission &bull; Class 8A2
+                    </div>
+
+                    <h1 class="text-4xl sm:text-6xl font-tech font-black text-white leading-tight">
+                        In-SPEAKER<br>
+                        <span class="bg-gradient-to-r from-amber-400 via-amber-200 to-yellow-500 bg-clip-text text-transparent">
+                            MODULE: TGG 113
+                        </span>
+                    </h1>
+
+                    <p class="text-slate-300 text-base sm:text-lg leading-relaxed font-light">
+                        A revolutionary fusion of Minecraft Jukebox geometry and high-performance sound architecture. Hand-crafted with <strong class="text-amber-400 font-semibold">Solid Hardwood Blocks</strong>, powered by a <strong class="text-white font-semibold">JENSTAR 3-Inch Subwoofer</strong>, and protected by heat-resistant <strong class="text-cyan-400 font-semibold">Dolby Acoustic Foam Insulation</strong>.
+                    </p>
+
+                    <!-- Quick Specs Bar -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                        <div class="glass-card p-3.5 rounded-2xl text-center">
+                            <i class="fa-solid fa-cube text-amber-400 text-lg mb-1"></i>
+                            <p class="text-[10px] text-slate-400 font-tech uppercase">Enclosure</p>
+                            <p class="text-xs font-bold text-white">Hardwood Blocks</p>
+                        </div>
+                        <div class="glass-card p-3.5 rounded-2xl text-center">
+                            <i class="fa-solid fa-bullhorn text-cyan-400 text-lg mb-1"></i>
+                            <p class="text-[10px] text-slate-400 font-tech uppercase">Subwoofer</p>
+                            <p class="text-xs font-bold text-white">JENSTAR 3-Inch</p>
+                        </div>
+                        <div class="glass-card p-3.5 rounded-2xl text-center">
+                            <i class="fa-solid fa-battery-full text-emerald-400 text-lg mb-1"></i>
+                            <p class="text-[10px] text-slate-400 font-tech uppercase">Battery</p>
+                            <p class="text-xs font-bold text-white">1200 mAh Rechargeable</p>
+                        </div>
+                        <div class="glass-card p-3.5 rounded-2xl text-center">
+                            <i class="fa-solid fa-shield-halved text-purple-400 text-lg mb-1"></i>
+                            <p class="text-[10px] text-slate-400 font-tech uppercase">Shield Foam</p>
+                            <p class="text-xs font-bold text-white">Dolby Heat Foam</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex flex-wrap gap-4 justify-center lg:justify-start">
+                        <button onclick="switchPage('mic-arena')" class="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-tech font-bold text-xs uppercase tracking-wider rounded-xl shadow-xl shadow-amber-500/20 transition-all">
+                            <i class="fa-solid fa-microphone mr-2"></i> Launch "Test It" Mic Arena
+                        </button>
+                        <button onclick="switchPage('advantages')" class="px-8 py-4 glass-card hover:bg-slate-800 text-white font-tech font-bold text-xs uppercase tracking-wider rounded-xl transition-all border-slate-700">
+                            <i class="fa-solid fa-list-check mr-2"></i> Key Advantages
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Showcase Visual Card -->
+                <div class="lg:col-span-5">
+                    <div class="glass-card p-5 rounded-3xl border-amber-500/30 glow-gold space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <span class="text-xs font-tech text-amber-400"><i class="fa-solid fa-circle-dot mr-1"></i> HARDWOOD ACOUSTIC GEO CUBE</span>
+                            <span class="text-[10px] bg-amber-500/20 text-amber-300 font-tech px-2 py-0.5 rounded">3-4W SPEED SOUND</span>
+                        </div>
+                        <div class="relative rounded-2xl overflow-hidden h-64 bg-slate-950">
+                            <img src="https://images.unsplash.com/photo-1545454675-3531b543be5d?q=80&w=1000&auto=format&fit=crop" alt="Premium Subwoofer" class="w-full h-full object-cover opacity-70">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <span class="text-amber-400 text-xs font-tech font-bold">Solid Wood Body &amp; Dolby Foam</span>
+                                <p class="text-white text-sm font-semibold mt-0.5">Engineered for Start Up Superstars Evaluation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Realistic Minecraft Jukebox Canvas Section -->
+            <div class="space-y-6 pt-6">
+                <div class="text-center max-w-2xl mx-auto">
+                    <span class="text-amber-400 font-tech text-xs tracking-widest uppercase font-bold">[ REALISTIC 3D MODEL ]</span>
+                    <h2 class="text-2xl sm:text-4xl font-tech font-black text-white mt-1">MINECRAFT GEO-BOX JUKEBOX</h2>
+                    <p class="text-slate-400 text-xs sm:text-sm mt-2">Interactive 3D model featuring hardwood block grain, corner brass brackets, vinyl record slot, and Jenstar subwoofer driver.</p>
+                </div>
+
+                <div class="relative max-w-4xl mx-auto aspect-square sm:aspect-video bg-slate-950 border border-amber-500/30 rounded-3xl overflow-hidden shadow-2xl glow-gold" id="three-canvas-container">
+                    <div id="loading-3d" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 z-20 transition-opacity duration-500">
+                        <div class="w-10 h-10 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-3"></div>
+                        <span class="text-amber-400 font-tech text-xs tracking-widest font-bold">Loading 3D Geo Box...</span>
+                    </div>
+
+                    <div class="absolute top-4 right-4 z-10 flex items-center gap-2">
+                        <button onclick="reset3DCamera()" class="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700 text-slate-300 text-xs font-tech hover:bg-slate-800">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Reset View
+                        </button>
+                        <button onclick="toggle3DRotation()" id="rotateToggleBtn" class="px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-tech hover:bg-amber-500/30">
+                            <i class="fa-solid fa-arrows-spin mr-1"></i> Auto-Rotate: ON
+                        </button>
+                    </div>
+
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md px-4 py-1.5 rounded-full border border-slate-700 text-[11px] font-tech text-slate-300 pointer-events-none z-10">
+                        <i class="fa-solid fa-hand-pointer text-amber-400 mr-2"></i> DRAG TO ROTATE &bull; SCROLL TO ZOOM
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- PAGE 2: KEY ADVANTAGES -->
+        <section id="page-advantages" class="page-content space-y-12 py-8 hidden">
+            <div class="text-center max-w-3xl mx-auto space-y-3">
+                <span class="text-amber-400 font-tech text-xs tracking-widest font-bold uppercase">[ PRODUCT STRENGTHS ]</span>
+                <h2 class="text-3xl sm:text-5xl font-tech font-black text-white">KEY ADVANTAGES</h2>
+                <p class="text-slate-400 text-sm sm:text-base">Comprehensive evaluation specifications designed for the Start Up Superstars presentation.</p>
+                <div class="w-20 h-1 bg-gradient-to-r from-amber-500 to-amber-300 mx-auto rounded-full"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="glass-card glass-card-hover p-6 rounded-3xl space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-plug text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-tech font-bold text-white">1. In-Built Charging Port / Cord</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Integrated charging cord tucked inside the body frame. Never worry about losing or forgetting extra cables during school presentations.</p>
+                </div>
+
+                <div class="glass-card glass-card-hover p-6 rounded-3xl space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
+                        <i class="fa-solid fa-fire-burner text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-tech font-bold text-white">2. Heat-Resistant Dolby Foam</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Acoustic foam lining absorbs thermal buildup during long audio play while bestowing rich Dolby-intensity vocal depth and clarity.</p>
+                </div>
+
+                <div class="glass-card glass-card-hover p-6 rounded-3xl space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                        <i class="fa-solid fa-feather-pointed text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-tech font-bold text-white">3. Lightweight &amp; Portable Body</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Solid hardwood block structure engineered for minimal weight and maximum bass acoustics. Slip it into your backpack easily.</p>
+                </div>
+
+                <div class="glass-card glass-card-hover p-6 rounded-3xl space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <i class="fa-solid fa-battery-full text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-tech font-bold text-white">4. High-Backup 1200 mAh Battery</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">High-density lithium cell providing extended cordless playback for day-long outdoor usage and class showcases.</p>
+                </div>
+
+                <div class="glass-card glass-card-hover p-6 rounded-3xl space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                        <i class="fa-solid fa-wind text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-tech font-bold text-white">5. Dust-Resistant Wooden Enclosure</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Sealed hardwood joints and fine mesh shield the interior JENSTAR 3" subwoofer driver and circuit from dust accumulation.</p>
+                </div>
+
+                <div class="glass-card glass-card-hover p-6 rounded-3xl space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                        <i class="fa-solid fa-bolt text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-tech font-bold text-white">6. 3 - 4 Watt Speed Sound Output</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Jenstar 3-inch subwoofer driver delivers responsive 3-4W sound speed with punchy low ends and clear vocal presence.</p>
+                </div>
+
+                <div class="glass-card glass-card-hover p-6 rounded-3xl space-y-3 lg:col-span-3">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400">
+                                <i class="fa-brands fa-bluetooth-b text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-tech font-bold text-white">7. True Wireless (10 - 20 Meters Range)</h3>
+                                <p class="text-slate-400 text-xs">Seamless long-range Bluetooth connection up to 20 meters without signal dropouts.</p>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded-lg bg-pink-500/20 text-pink-300 border border-pink-500/30 text-xs font-tech font-bold">LONG RANGE STABILITY</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 3: REVAMPED MIC ARENA (ULTRA PRO SOUND LAB) -->
+        <section id="page-mic-arena" class="page-content space-y-8 py-4 hidden">
+            
+            <!-- Section Header & Quick Diagnostic Telemetry Bar -->
+            <div class="space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-amber-400 font-tech text-xs tracking-widest font-bold uppercase">STUDIO GRADE AUDIO DIAGNOSTICS &amp; FX LAB</span>
+                        </div>
+                        <h2 class="text-3xl font-tech font-black text-white mt-1 flex items-center gap-3">
+                            "TEST IT" MIC ARENA 
+                            <span class="text-xs font-tech bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-full">REAL-TIME ENGINE</span>
+                        </h2>
+                        <p class="text-slate-400 text-xs sm:text-sm">Test input signal quality, modify pitch, apply 3-band EQ, trigger live soundboard FX, and process 100+ voice transformations.</p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button id="start-mic-btn" onclick="toggleMicrophone()" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-tech font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 cursor-pointer">
+                            <i id="mic-main-icon" class="fa-solid fa-microphone text-base"></i>
+                            <span id="mic-btn-text">ENABLE MIC ENGINE</span>
+                        </button>
+                        <button id="record-btn" onclick="toggleRecording()" disabled class="px-6 py-3 bg-slate-800 border border-slate-700 text-slate-500 font-tech font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 cursor-not-allowed">
+                            <i id="record-icon" class="fa-solid fa-circle text-red-500 text-xs"></i>
+                            <span id="record-btn-text">REC AUDIO</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Mic Telemetry Bar -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs font-tech">
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
+                        <span class="text-slate-500 text-[10px]">MIC SAMPLE RATE</span>
+                        <span id="diag-sample-rate" class="text-white font-bold text-sm mt-0.5">48.0 kHz</span>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
+                        <span class="text-slate-500 text-[10px]">ESTIMATED LATENCY</span>
+                        <span id="diag-latency" class="text-cyan-400 font-bold text-sm mt-0.5">~12.5 ms</span>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
+                        <span class="text-slate-500 text-[10px]">SIGNAL SNR</span>
+                        <span id="diag-snr" class="text-emerald-400 font-bold text-sm mt-0.5">-- dB</span>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col">
+                        <span class="text-slate-500 text-[10px]">NOISE FLOOR</span>
+                        <span id="diag-noise" class="text-amber-400 font-bold text-sm mt-0.5">Low (-58dB)</span>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5 flex flex-col col-span-2 sm:col-span-1">
+                        <span class="text-slate-500 text-[10px]">AUDIO RATING</span>
+                        <span id="diag-rating" class="text-amber-400 font-bold text-sm mt-0.5">🌟 Studio Crisp</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Column: Audio Visualizer with View Modes -->
+                <div class="lg:col-span-5 glass-card p-5 rounded-3xl space-y-4 flex flex-col">
+                    <div class="flex items-center justify-between text-xs font-tech">
+                        <span class="text-slate-300 font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-wave-square text-amber-400"></i>
+                            VISUALIZER SCOPE
+                        </span>
+                        
+                        <!-- Visualizer Mode Buttons -->
+                        <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                            <button onclick="setVisMode('bars')" id="vis-btn-bars" class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500 text-slate-950">BARS</button>
+                            <button onclick="setVisMode('wave')" id="vis-btn-wave" class="px-2 py-0.5 text-[10px] font-bold rounded text-slate-400 hover:text-white">WAVE</button>
+                            <button onclick="setVisMode('radial')" id="vis-btn-radial" class="px-2 py-0.5 text-[10px] font-bold rounded text-slate-400 hover:text-white">RADIAL</button>
+                        </div>
+                    </div>
+
+                    <!-- Canvas Box -->
+                    <div class="relative h-56 bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center flex-grow">
+                        <canvas id="visualizer-canvas" class="w-full h-full block"></canvas>
+                        <div id="visualizer-placeholder" class="absolute text-center p-4">
+                            <i class="fa-solid fa-microphone-slash text-slate-700 text-4xl mb-3 animate-bounce"></i>
+                            <p class="text-xs text-slate-400 font-tech font-bold">CLICK "ENABLE MIC ENGINE" TO START</p>
+                            <p class="text-[10px] text-slate-600 mt-1">Live waveform &amp; spectral analysis</p>
+                        </div>
+
+                        <!-- Live Peak Volume VU Meter Overlay -->
+                        <div class="absolute bottom-3 left-3 right-3 bg-slate-900/90 backdrop-blur border border-slate-800 rounded-lg p-2 flex items-center gap-3">
+                            <span class="text-[10px] font-tech text-slate-400">VU LEVEL</span>
+                            <div class="flex-grow bg-slate-950 h-2 rounded-full overflow-hidden flex">
+                                <div id="vu-bar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 w-0 transition-all duration-75"></div>
+                            </div>
+                            <span id="vu-value" class="text-[10px] font-tech font-bold text-amber-400 min-w-[36px] text-right">-100 dB</span>
+                        </div>
+                    </div>
+
+                    <!-- Active Modulator Indicator & Monitor Switch -->
+                    <div class="p-3 bg-slate-900/80 rounded-2xl border border-slate-800 flex items-center justify-between text-xs font-tech">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] text-slate-500">SELECTED MODULATOR</span>
+                            <span id="active-preset-name" class="text-amber-400 font-bold">Standard Voice (Clean)</span>
+                        </div>
+                        
+                        <!-- Toggle Local Monitoring (Hear Yourself) -->
+                        <label class="flex items-center gap-2 cursor-pointer bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-amber-500/40">
+                            <input type="checkbox" id="monitor-toggle" onchange="toggleMonitoring()" class="sr-only peer">
+                            <div class="w-8 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-500 relative"></div>
+                            <span class="text-[10px] font-bold text-slate-300">HEAR MIC</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Middle Column: Real-Time Audio Mixer Deck -->
+                <div class="lg:col-span-7 glass-card p-5 rounded-3xl space-y-4">
+                    <div class="flex items-center justify-between text-xs font-tech border-b border-slate-800 pb-2">
+                        <span class="text-slate-300 font-bold"><i class="fa-solid fa-sliders text-cyan-400 mr-2"></i> STUDIO MIXER &amp; PARAMETER TWEAKER</span>
+                        <button onclick="resetMixerDefaults()" class="text-[10px] text-slate-400 hover:text-amber-400 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Reset FX
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Pitch Shift Control -->
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-1.5">
+                            <div class="flex justify-between text-xs font-tech">
+                                <span class="text-slate-400">PITCH SHIFT (SEMITONES)</span>
+                                <span id="val-pitch" class="text-amber-400 font-bold">0 st</span>
+                            </div>
+                            <input type="range" id="slider-pitch" min="-12" max="12" step="0.5" value="0" oninput="updateMixerNode('pitch', this.value)" class="w-full">
+                            <div class="flex justify-between text-[9px] text-slate-600 font-tech">
+                                <span>-12 (Deep)</span>
+                                <span>0 (Normal)</span>
+                                <span>+12 (High)</span>
+                            </div>
+                        </div>
+
+                        <!-- Gain / Volume Control -->
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-1.5">
+                            <div class="flex justify-between text-xs font-tech">
+                                <span class="text-slate-400">INPUT GAIN BOOST</span>
+                                <span id="val-gain" class="text-amber-400 font-bold">100%</span>
+                            </div>
+                            <input type="range" id="slider-gain" min="0" max="200" step="5" value="100" oninput="updateMixerNode('gain', this.value)" class="w-full">
+                            <div class="flex justify-between text-[9px] text-slate-600 font-tech">
+                                <span>0%</span>
+                                <span>100%</span>
+                                <span>200%</span>
+                            </div>
+                        </div>
+
+                        <!-- 3-Band Equalizer (Bass, Mid, Treble) -->
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2 sm:col-span-2">
+                            <span class="text-[10px] font-tech text-slate-400 font-bold tracking-wider uppercase">3-BAND EQUALIZER (EQ)</span>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div>
+                                    <div class="flex justify-between text-[10px] font-tech text-slate-300">
+                                        <span>BASS</span>
+                                        <span id="val-bass" class="text-cyan-400 font-bold">0 dB</span>
+                                    </div>
+                                    <input type="range" id="slider-bass" min="-12" max="12" value="0" oninput="updateMixerNode('bass', this.value)" class="w-full">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] font-tech text-slate-300">
+                                        <span>MID</span>
+                                        <span id="val-mid" class="text-amber-400 font-bold">0 dB</span>
+                                    </div>
+                                    <input type="range" id="slider-mid" min="-12" max="12" value="0" oninput="updateMixerNode('mid', this.value)" class="w-full">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-[10px] font-tech text-slate-300">
+                                        <span>TREBLE</span>
+                                        <span id="val-treble" class="text-emerald-400 font-bold">0 dB</span>
+                                    </div>
+                                    <input type="range" id="slider-treble" min="-12" max="12" value="0" oninput="updateMixerNode('treble', this.value)" class="w-full">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Echo Delay & Reverb blend -->
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-1.5">
+                            <div class="flex justify-between text-xs font-tech">
+                                <span class="text-slate-400">ECHO / DELAY WET</span>
+                                <span id="val-delay" class="text-amber-400 font-bold">0%</span>
+                            </div>
+                            <input type="range" id="slider-delay" min="0" max="80" step="5" value="0" oninput="updateMixerNode('delay', this.value)" class="w-full">
+                        </div>
+
+                        <!-- Distortion Fuzz -->
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-1.5">
+                            <div class="flex justify-between text-xs font-tech">
+                                <span class="text-slate-400">DRIVE / DISTORTION</span>
+                                <span id="val-dist" class="text-red-400 font-bold">0%</span>
+                            </div>
+                            <input type="range" id="slider-dist" min="0" max="100" step="5" value="0" oninput="updateMixerNode('dist', this.value)" class="w-full">
+                        </div>
+
+                    </div>
+
+                    <!-- Soundboard Quick Trigger Pads -->
+                    <div class="pt-2">
+                        <div class="flex items-center justify-between text-xs font-tech mb-2">
+                            <span class="text-amber-400 font-bold flex items-center gap-1.5">
+                                <i class="fa-solid fa-gamepad"></i> INSTANT SOUNDBOARD FX
+                            </span>
+                            <span class="text-[10px] text-slate-500">MIXES LIVE WITH MIC</span>
+                        </div>
+                        <div class="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                            <button onclick="playSoundFX('airhorn')" class="p-2 rounded-xl bg-slate-950 hover:bg-amber-500/20 border border-slate-800 hover:border-amber-500/40 text-center text-slate-300 transition-all flex flex-col items-center">
+                                <i class="fa-solid fa-bullhorn text-amber-400 text-sm mb-1"></i>
+                                <span class="text-[9px] font-tech font-bold">Airhorn</span>
+                            </button>
+                            <button onclick="playSoundFX('applause')" class="p-2 rounded-xl bg-slate-950 hover:bg-amber-500/20 border border-slate-800 hover:border-amber-500/40 text-center text-slate-300 transition-all flex flex-col items-center">
+                                <i class="fa-solid fa-hands-clapping text-emerald-400 text-sm mb-1"></i>
+                                <span class="text-[9px] font-tech font-bold">Applause</span>
+                            </button>
+                            <button onclick="playSoundFX('cheer')" class="p-2 rounded-xl bg-slate-950 hover:bg-amber-500/20 border border-slate-800 hover:border-amber-500/40 text-center text-slate-300 transition-all flex flex-col items-center">
+                                <i class="fa-solid fa-party-horn text-pink-400 text-sm mb-1"></i>
+                                <span class="text-[9px] font-tech font-bold">Cheering</span>
+                            </button>
+                            <button onclick="playSoundFX('gameover')" class="p-2 rounded-xl bg-slate-950 hover:bg-amber-500/20 border border-slate-800 hover:border-amber-500/40 text-center text-slate-300 transition-all flex flex-col items-center">
+                                <i class="fa-solid fa-skull text-red-400 text-sm mb-1"></i>
+                                <span class="text-[9px] font-tech font-bold">Fail</span>
+                            </button>
+                            <button onclick="playSoundFX('laser')" class="p-2 rounded-xl bg-slate-950 hover:bg-amber-500/20 border border-slate-800 hover:border-amber-500/40 text-center text-slate-300 transition-all flex flex-col items-center">
+                                <i class="fa-solid fa-bolt text-cyan-400 text-sm mb-1"></i>
+                                <span class="text-[9px] font-tech font-bold">Laser</span>
+                            </button>
+                            <button onclick="playSoundFX('cyber')" class="p-2 rounded-xl bg-slate-950 hover:bg-amber-500/20 border border-slate-800 hover:border-amber-500/40 text-center text-slate-300 transition-all flex flex-col items-center">
+                                <i class="fa-solid fa-atom text-purple-400 text-sm mb-1"></i>
+                                <span class="text-[9px] font-tech font-bold">Cyber</span>
+                            </button>
+                            <button onclick="playSoundFX('drumroll')" class="p-2 rounded-xl bg-slate-950 hover:bg-amber-500/20 border border-slate-800 hover:border-amber-500/40 text-center text-slate-300 transition-all flex flex-col items-center">
+                                <i class="fa-solid fa-drum text-yellow-400 text-sm mb-1"></i>
+                                <span class="text-[9px] font-tech font-bold">Drums</span>
+                            </button>
+                            <button onclick="playSoundFX('glitch')" class="p-2 rounded-xl bg-slate-950 hover:bg-amber-500/20 border border-slate-800 hover:border-amber-500/40 text-center text-slate-300 transition-all flex flex-col items-center">
+                                <i class="fa-solid fa-bug text-orange-400 text-sm mb-1"></i>
+                                <span class="text-[9px] font-tech font-bold">Glitch</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speech Subtitles Panel -->
+            <div class="glass-card p-5 rounded-3xl space-y-3">
+                <div class="flex items-center justify-between text-xs font-tech">
+                    <span class="text-slate-300 font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-closed-captioning text-cyan-400"></i>
+                        REAL-TIME SPEECH TRANSCRIPT &amp; SUBTITLES
+                    </span>
+                    <div class="flex gap-2">
+                        <button onclick="copySubtitles()" class="text-slate-400 hover:text-white text-[11px] bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
+                            <i class="fa-solid fa-copy mr-1"></i> Copy
+                        </button>
+                        <button onclick="clearSubtitles()" class="text-slate-400 hover:text-red-400 text-[11px] bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
+                            <i class="fa-solid fa-trash mr-1"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <div id="subtitle-box" class="min-h-[100px] max-h-[140px] overflow-y-auto bg-slate-950 p-4 rounded-2xl border border-slate-800 text-slate-300 text-sm font-sans leading-relaxed">
+                    <p class="text-slate-600 text-xs italic font-tech">Enable mic engine and speak to view instant live AI speech-to-text transcript...</p>
+                </div>
+            </div>
+
+            <!-- Voice Modulators Browser Header & Search -->
+            <div class="space-y-4 pt-2">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-tech font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-cubes-stacked text-amber-400"></i>
+                            100+ VOICE MODULATOR MATRIX
+                        </h3>
+                        <p class="text-xs text-slate-400">Filter, search, or click any voice preset to immediately transform your live audio stream.</p>
+                    </div>
+
+                    <!-- Search & Filter Controls -->
+                    <div class="flex items-center gap-3">
+                        <input type="text" id="preset-search" oninput="filterPresets()" placeholder="Search 100+ modulators..." class="bg-slate-900 border border-slate-800 text-white text-xs px-3.5 py-2 rounded-xl focus:outline-none focus:border-amber-500 w-52 font-tech">
+                        <select id="category-filter" onchange="filterPresets()" class="bg-slate-900 border border-slate-800 text-white text-xs px-3 py-2 rounded-xl focus:outline-none focus:border-amber-500 font-tech">
+                            <option value="all">All Categories</option>
+                            <option value="sci-fi">Sci-Fi &amp; Cyber</option>
+                            <option value="creatures">Creatures &amp; Monsters</option>
+                            <option value="characters">Characters &amp; Pitch</option>
+                            <option value="radios">Vintage &amp; Radios</option>
+                            <option value="environments">Environments &amp; Reverbs</option>
+                            <option value="studio">Studio &amp; FX</option>
+                            <option value="extreme">Extreme FX</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Modulators Grid Container -->
+                <div id="presets-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 max-h-[420px] overflow-y-auto p-3 bg-slate-950/80 rounded-3xl border border-slate-800">
+                    <!-- Dynamically Populated via JS -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- PAGE 4: AUDIO GALLERY -->
+        <section id="page-gallery" class="page-content space-y-8 py-4 hidden">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-6">
+                <div>
+                    <span class="text-amber-400 font-tech text-xs tracking-widest font-bold uppercase">[ SAVED AUDIO CLIPS ]</span>
+                    <h2 class="text-3xl font-tech font-black text-white mt-1">AUDIO GALLERY</h2>
+                    <p class="text-slate-400 text-xs sm:text-sm">Listen to recorded modulated audio, download files, or export directly to your device.</p>
+                </div>
+                <button onclick="clearAllGallery()" class="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-red-500/50 text-slate-400 hover:text-red-400 text-xs font-tech rounded-xl transition-all">
+                    <i class="fa-solid fa-trash-can mr-1.5"></i> Clear All Clips
+                </button>
+            </div>
+
+            <!-- Gallery Audio List -->
+            <div id="gallery-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="gallery-empty" class="col-span-full text-center py-16 glass-card rounded-3xl space-y-3">
+                    <i class="fa-solid fa-file-audio text-slate-700 text-4xl"></i>
+                    <h3 class="text-white font-tech font-bold text-lg">No Audio Recordings Saved Yet</h3>
+                    <p class="text-slate-500 text-xs max-w-sm mx-auto">Go to "Mic Arena", record your voice using any modulator or FX combo, and save it here.</p>
+                    <button onclick="switchPage('mic-arena')" class="mt-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-tech text-xs font-bold rounded-xl shadow-lg">
+                        Go to Mic Arena
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-tech">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-cube text-amber-400 text-lg"></i>
+                <span class="text-slate-300 font-bold">In-SPEAKER Module TGG 113</span>
+                <span>&bull; Class 8A2 Presentation</span>
+            </div>
+            <div>Official Start Up Superstars Project Submission</div>
+        </div>
+    </footer>
+
+    <script>
+        /* TOAST NOTIFICATION UTILITY */
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fa-solid fa-circle-info text-amber-400 mr-2"></i> ${msg}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        /* PAGE NAVIGATION SWITCHER */
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('page-' + pageId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+                btn.className = 'nav-tab-btn px-4 py-2 rounded-xl text-xs font-tech font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/50';
+            });
+
+            const activeNav = document.getElementById('nav-' + pageId);
+            if (activeNav) {
+                activeNav.className = 'nav-tab-btn px-4 py-2 rounded-xl text-xs font-tech font-bold transition-all text-amber-400 bg-slate-800 border border-amber-500/30';
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* WEB AUDIO DEMO SOUND PLAYER */
+        let audioCtx = null;
+        let isPlayingDemo = false;
+        let demoOscillators = [];
+
+        function toggleAudioDemo() {
+            const btnIcon = document.getElementById('audioBtnIcon');
+            const btnText = document.getElementById('audioBtnText');
+
+            if (!isPlayingDemo) {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const freqs = [130.81, 196.00, 261.63, 329.63];
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0.15;
+                gain.connect(audioCtx.destination);
+
+                freqs.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    osc.type = idx === 0 ? 'sawtooth' : 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 800;
+
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    osc.start();
+                    demoOscillators.push(osc);
+                });
+
+                isPlayingDemo = true;
+                btnIcon.className = 'fa-solid fa-stop';
+                btnText.innerText = 'STOP DEMO';
+                showToast("Sound Demo playing...");
+            } else {
+                demoOscillators.forEach(osc => { try { osc.stop(); osc.disconnect(); } catch(e){} });
+                demoOscillators = [];
+                isPlayingDemo = false;
+                btnIcon.className = 'fa-solid fa-play';
+                btnText.innerText = 'SOUND DEMO';
+            }
+        }
+
+        /* THREE.JS REALISTIC JUKEBOX CUBE */
+        let scene, camera, renderer, speakerGroup;
+        let autoRotate = true;
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        window.addEventListener('load', () => {
+            init3D();
+            populatePresets();
+            renderGallery();
+        });
+
+        function createWoodTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, 512, 512);
+            grad.addColorStop(0, '#5c2c0c'); grad.addColorStop(0.5, '#78350f'); grad.addColorStop(1, '#451a03');
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, 512, 512);
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)'; ctx.lineWidth = 4;
+            for (let i = 0; i < 512; i += 16) {
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.bezierCurveTo(170, i + 10, 340, i - 10, 512, i); ctx.stroke();
+            }
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)'; ctx.lineWidth = 8;
+            ctx.strokeRect(0, 0, 512, 512);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createTopJukeboxTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#6b2d0c'; ctx.fillRect(0, 0, 512, 512);
+            ctx.strokeStyle = '#2d1203'; ctx.lineWidth = 16; ctx.strokeRect(0, 0, 512, 512);
+            ctx.fillStyle = '#0f0703'; ctx.fillRect(128, 216, 256, 80);
+            ctx.strokeStyle = '#d97706'; ctx.lineWidth = 6; ctx.strokeRect(128, 216, 256, 80);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function init3D() {
+            const container = document.getElementById('three-canvas-container');
+            if (!container) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+            camera.position.set(3.8, 3.2, 4.8);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            const sunLight = new THREE.DirectionalLight(0xfff7ed, 1.2);
+            sunLight.position.set(6, 10, 6);
+            scene.add(sunLight);
+
+            speakerGroup = new THREE.Group();
+            scene.add(speakerGroup);
+
+            const woodMat = new THREE.MeshStandardMaterial({ map: createWoodTexture(), roughness: 0.6 });
+            const topMat = new THREE.MeshStandardMaterial({ map: createTopJukeboxTexture(), roughness: 0.5 });
+            const materials = [woodMat, woodMat, topMat, woodMat, woodMat, woodMat];
+
+            const cubeGeo = new THREE.BoxGeometry(2.2, 2.2, 2.2);
+            const mainCube = new THREE.Mesh(cubeGeo, materials);
+            speakerGroup.add(mainCube);
+
+            // Corner brackets
+            const cornerMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.8 });
+            const cornerGeo = new THREE.BoxGeometry(0.25, 0.25, 0.25);
+            [-1.1, 1.1].forEach(x => {
+                [-1.1, 1.1].forEach(y => {
+                    [-1.1, 1.1].forEach(z => {
+                        const corner = new THREE.Mesh(cornerGeo, cornerMat);
+                        corner.position.set(x, y, z);
+                        speakerGroup.add(corner);
+                    });
+                });
+            });
+
+            // Subwoofer driver
+            const frontGroup = new THREE.Group();
+            frontGroup.position.set(0, 0, 1.11);
+            speakerGroup.add(frontGroup);
+
+            const ringMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9 });
+            const outerRing = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.06, 16, 64), ringMat);
+            frontGroup.add(outerRing);
+
+            const coneMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+            const cone = new THREE.Mesh(new THREE.ConeGeometry(0.55, 0.35, 32), coneMat);
+            cone.rotation.x = -Math.PI / 2;
+            cone.position.z = -0.12;
+            frontGroup.add(cone);
+
+            const capMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.7 });
+            const cap = new THREE.Mesh(new THREE.SphereGeometry(0.18, 24, 24, 0, Math.PI * 2, 0, Math.PI / 2), capMat);
+            cap.rotation.x = -Math.PI / 2;
+            cap.position.z = 0.02;
+            frontGroup.add(cap);
+
+            // Loader cleanup
+            const loader = document.getElementById('loading-3d');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }
+
+            container.addEventListener('mousedown', e => { isDragging = true; previousMousePosition = { x: e.offsetX, y: e.offsetY }; });
+            container.addEventListener('mousemove', e => {
+                if (isDragging) {
+                    const deltaX = e.offsetX - previousMousePosition.x;
+                    const deltaY = e.offsetY - previousMousePosition.y;
+                    speakerGroup.rotation.y += deltaX * 0.008;
+                    speakerGroup.rotation.x += deltaY * 0.008;
+                }
+                previousMousePosition = { x: e.offsetX, y: e.offsetY };
+            });
+            document.addEventListener('mouseup', () => isDragging = false);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                if (autoRotate && !isDragging) speakerGroup.rotation.y += 0.006;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        function reset3DCamera() { if (speakerGroup) speakerGroup.rotation.set(0, 0, 0); }
+        function toggle3DRotation() {
+            autoRotate = !autoRotate;
+            document.getElementById('rotateToggleBtn').innerHTML = autoRotate ? '<i class="fa-solid fa-arrows-spin mr-1"></i> Auto-Rotate: ON' : '<i class="fa-solid fa-pause mr-1"></i> Auto-Rotate: OFF';
+        }
+    </script>
+
+    <script>
+        /* 100+ VOICE MODULATOR PRESETS DEFINITION */
+        const PRESETS = [
+            // Sci-Fi & Cyber (1-15)
+            { id: 'clean', name: 'Standard Clean', cat: 'sci-fi', pitch: 0, filterType: 'allpass', filterFreq: 1000, dist: 0, delay: 0 },
+            { id: 'cyberpunk', name: 'Cyberpunk 2077', cat: 'sci-fi', pitch: -2, filterType: 'peaking', filterFreq: 2400, dist: 20, delay: 10 },
+            { id: 'dalek', name: 'Dalek Mech', cat: 'sci-fi', pitch: 2, filterType: 'bandpass', filterFreq: 1500, dist: 50 },
+            { id: 'hal9000', name: 'HAL 9000 AI', cat: 'sci-fi', pitch: -3, filterType: 'lowpass', filterFreq: 1200, dist: 0, delay: 15 },
+            { id: 'alien-overlord', name: 'Alien Overlord', cat: 'sci-fi', pitch: -7, filterType: 'lowpass', filterFreq: 800, dist: 30, delay: 25 },
+            { id: 'cyborg-v2', name: 'Cyborg V2', cat: 'sci-fi', pitch: -1, filterType: 'highpass', filterFreq: 500, dist: 35, delay: 5 },
+            { id: 'void-walker', name: 'Void Walker', cat: 'sci-fi', pitch: -5, filterType: 'notch', filterFreq: 1000, dist: 10, delay: 40 },
+            { id: 'hologram-comm', name: 'Hologram Comm', cat: 'sci-fi', pitch: 3, filterType: 'bandpass', filterFreq: 2000, dist: 20 },
+            { id: 'starship-captain', name: 'Starship Intercom', cat: 'sci-fi', pitch: -1, filterType: 'highpass', filterFreq: 700, dist: 15, delay: 10 },
+            { id: 'quantum-echo', name: 'Quantum Echo', cat: 'sci-fi', pitch: 0, filterType: 'allpass', filterFreq: 1000, delay: 40 },
+            { id: 'matrix-agent', name: 'Matrix Agent', cat: 'sci-fi', pitch: -4, filterType: 'lowpass', filterFreq: 900, dist: 10 },
+            { id: 'droid-protocol', name: 'Protocol Droid', cat: 'sci-fi', pitch: 5, filterType: 'bandpass', filterFreq: 2800, dist: 10 },
+            { id: 'laser-synth', name: 'Laser Synth', cat: 'sci-fi', pitch: 4, filterType: 'peaking', filterFreq: 3200, dist: 25 },
+            { id: 'warp-core', name: 'Warp Core Voice', cat: 'sci-fi', pitch: -5, filterType: 'lowpass', filterFreq: 600, delay: 30 },
+            { id: 'time-traveler', name: 'Time Traveler', cat: 'sci-fi', pitch: 2, filterType: 'highpass', filterFreq: 1200, delay: 20 },
+
+            // Creatures & Monsters (16-30)
+            { id: 'demon-king', name: 'Demon King', cat: 'creatures', pitch: -10, filterType: 'lowpass', filterFreq: 500, dist: 50 },
+            { id: 'dragon-roar', name: 'Dragon Voice', cat: 'creatures', pitch: -9, filterType: 'lowpass', filterFreq: 600, dist: 60 },
+            { id: 'deep-goblin', name: 'Cave Goblin', cat: 'creatures', pitch: 7, filterType: 'highpass', filterFreq: 1500, dist: 20 },
+            { id: 'vampire-lord', name: 'Vampire Lord', cat: 'creatures', pitch: -3, filterType: 'peaking', filterFreq: 1000, delay: 15 },
+            { id: 'shadow-spectre', name: 'Shadow Spectre', cat: 'creatures', pitch: -6, filterType: 'bandpass', filterFreq: 900, delay: 35 },
+            { id: 'titan-giant', name: 'Titan Giant', cat: 'creatures', pitch: -12, filterType: 'lowpass', filterFreq: 400, dist: 30 },
+            { id: 'ogre-smash', name: 'Ogre Warrior', cat: 'creatures', pitch: -8, filterType: 'lowpass', filterFreq: 550, dist: 40 },
+            { id: 'kraken-deep', name: 'Kraken Deep', cat: 'creatures', pitch: -11, filterType: 'lowpass', filterFreq: 350, delay: 25 },
+            { id: 'gargoyle-stone', name: 'Gargoyle Stone', cat: 'creatures', pitch: -5, filterType: 'highpass', filterFreq: 400, dist: 35 },
+            { id: 'ghost-whisper', name: 'Ghost Whisper', cat: 'creatures', pitch: 3, filterType: 'bandpass', filterFreq: 1800, delay: 30 },
+            { id: 'werewolf', name: 'Werewolf Howl', cat: 'creatures', pitch: -4, filterType: 'peaking', filterFreq: 1200, dist: 45 },
+            { id: 'swamp-monster', name: 'Swamp Monster', cat: 'creatures', pitch: -7, filterType: 'lowpass', filterFreq: 450 },
+            { id: 'phantom', name: 'Phantom Ghoul', cat: 'creatures', pitch: -4, filterType: 'notch', filterFreq: 1500, delay: 25 },
+            { id: 'basilisk', name: 'Sessile Basilisk', cat: 'creatures', pitch: -2, filterType: 'highpass', filterFreq: 1800 },
+            { id: 'zombie-horde', name: 'Zombie Horde', cat: 'creatures', pitch: -6, filterType: 'lowpass', filterFreq: 500 },
+
+            // Characters & Pitch (31-45)
+            { id: 'chipmunk', name: 'Chipmunk High', cat: 'characters', pitch: 9, filterType: 'highpass', filterFreq: 1000 },
+            { id: 'helium-gas', name: 'Helium Balloon', cat: 'characters', pitch: 7, filterType: 'highpass', filterFreq: 800 },
+            { id: 'pixie-fairy', name: 'Pixie Fairy', cat: 'characters', pitch: 11, filterType: 'highpass', filterFreq: 1500 },
+            { id: 'dwarf-miner', name: 'Dwarf Miner', cat: 'characters', pitch: -4, filterType: 'lowpass', filterFreq: 900 },
+            { id: 'wizard-merlin', name: 'Wizard Merlin', cat: 'characters', pitch: -2, filterType: 'peaking', filterFreq: 1100, delay: 20 },
+            { id: 'witch-cackle', name: 'Witch Cackle', cat: 'characters', pitch: 5, filterType: 'bandpass', filterFreq: 2200, dist: 20 },
+            { id: 'cartoon-hero', name: 'Cartoon Hero', cat: 'characters', pitch: 4, filterType: 'highpass', filterFreq: 600 },
+            { id: 'anime-chibi', name: 'Anime Chibi', cat: 'characters', pitch: 10, filterType: 'highpass', filterFreq: 1200 },
+            { id: 'squeaky-toy', name: 'Squeaky Toy', cat: 'characters', pitch: 12, filterType: 'highpass', filterFreq: 2000 },
+            { id: 'gnome-tinker', name: 'Gnome Tinker', cat: 'characters', pitch: 6, filterType: 'bandpass', filterFreq: 1800 },
+            { id: 'pirate-captain', name: 'Pirate Captain', cat: 'characters', pitch: -5, filterType: 'lowpass', filterFreq: 1000, dist: 10 },
+            { id: 'super-villain', name: 'Super Villain', cat: 'characters', pitch: -6, filterType: 'peaking', filterFreq: 800, delay: 15 },
+            { id: 'elf-archer', name: 'Elven Archer', cat: 'characters', pitch: 3, filterType: 'highpass', filterFreq: 900 },
+            { id: 'robot-sidekick', name: 'Robot Sidekick', cat: 'characters', pitch: 4, filterType: 'bandpass', filterFreq: 2400 },
+            { id: 'deep-baritone', name: 'Deep Baritone', cat: 'characters', pitch: -6, filterType: 'lowpass', filterFreq: 700 },
+
+            // Vintage & Radios (46-60)
+            { id: 'telephone-80s', name: '80s Landline Phone', cat: 'radios', pitch: 0, filterType: 'bandpass', filterFreq: 1800, dist: 15 },
+            { id: 'walkie-talkie', name: 'Military Walkie-Talkie', cat: 'radios', pitch: 1, filterType: 'bandpass', filterFreq: 1600, dist: 35 },
+            { id: 'cb-radio', name: 'CB Radio Transceiver', cat: 'radios', pitch: -1, filterType: 'bandpass', filterFreq: 1400, dist: 40 },
+            { id: 'megaphone', name: 'Stadium Megaphone', cat: 'radios', pitch: 1, filterType: 'bandpass', filterFreq: 2100, dist: 50 },
+            { id: 'gramophone-1920', name: '1920s Gramophone', cat: 'radios', pitch: -2, filterType: 'bandpass', filterFreq: 1200, dist: 30 },
+            { id: 'drive-thru', name: 'Drive-Thru Speaker', cat: 'radios', pitch: 0, filterType: 'bandpass', filterFreq: 1100, dist: 60 },
+            { id: 'aviation-mic', name: 'Pilot Cockpit Radio', cat: 'radios', pitch: 1, filterType: 'highpass', filterFreq: 1300, dist: 40 },
+            { id: 'cassette-tape', name: 'Old Cassette Tape', cat: 'radios', pitch: 0, filterType: 'lowpass', filterFreq: 2500 },
+            { id: 'am-radio', name: 'AM Radio Station', cat: 'radios', pitch: 0, filterType: 'bandpass', filterFreq: 1500, dist: 25 },
+            { id: 'vinyl-scratched', name: 'Vinyl Record Playback', cat: 'radios', pitch: -1, filterType: 'bandpass', filterFreq: 1900, dist: 20 },
+            { id: 'intercom-office', name: 'Office Intercom', cat: 'radios', pitch: 0, filterType: 'bandpass', filterFreq: 2200, dist: 10 },
+            { id: 'ham-radio', name: 'Ham Shortwave Radio', cat: 'radios', pitch: -2, filterType: 'bandpass', filterFreq: 1300, dist: 45 },
+            { id: 'sub-intercom', name: 'Submarine Speaker', cat: 'radios', pitch: -3, filterType: 'lowpass', filterFreq: 1000, delay: 10 },
+            { id: 'vintage-tv', name: 'Vintage Black & White TV', cat: 'radios', pitch: 0, filterType: 'bandpass', filterFreq: 1700, dist: 30 },
+            { id: 'pa-system', name: 'School PA System', cat: 'radios', pitch: 1, filterType: 'peaking', filterFreq: 2000, delay: 15 },
+
+            // Environments & Reverbs (61-75)
+            { id: 'cathedral', name: 'Gothic Cathedral', cat: 'environments', pitch: 0, filterType: 'allpass', filterFreq: 1000, delay: 45 },
+            { id: 'underwater', name: 'Deep Underwater', cat: 'environments', pitch: -3, filterType: 'lowpass', filterFreq: 400, delay: 20 },
+            { id: 'deep-cave', name: 'Echoing Deep Cave', cat: 'environments', pitch: -2, filterType: 'lowpass', filterFreq: 900, delay: 50 },
+            { id: 'metal-barrel', name: 'Inside Metal Barrel', cat: 'environments', pitch: 1, filterType: 'bandpass', filterFreq: 1200, delay: 15 },
+            { id: 'echo-canyon', name: 'Echo Canyon', cat: 'environments', pitch: 0, filterType: 'allpass', filterFreq: 1000, delay: 60 },
+            { id: 'glass-room', name: 'Glass Mirror Room', cat: 'environments', pitch: 2, filterType: 'highpass', filterFreq: 2000, delay: 10 },
+            { id: 'bathroom-sing', name: 'Bathroom Acoustics', cat: 'environments', pitch: 0, filterType: 'peaking', filterFreq: 1500, delay: 12 },
+            { id: 'outer-space', name: 'Outer Space Void', cat: 'environments', pitch: -4, filterType: 'notch', filterFreq: 800, delay: 65 },
+            { id: 'tunnel', name: 'Concrete Tunnel', cat: 'environments', pitch: -1, filterType: 'lowpass', filterFreq: 1100, delay: 30 },
+            { id: 'concert-hall', name: 'Grand Concert Hall', cat: 'environments', pitch: 0, filterType: 'allpass', filterFreq: 1000, delay: 25 },
+            { id: 'stadium-echo', name: 'Sports Stadium', cat: 'environments', pitch: 1, filterType: 'highpass', filterFreq: 800, delay: 40 },
+            { id: 'bunker', name: 'Underground Bunker', cat: 'environments', pitch: -2, filterType: 'lowpass', filterFreq: 750, delay: 20 },
+            { id: 'well-shaft', name: 'Deep Water Well', cat: 'environments', pitch: -4, filterType: 'lowpass', filterFreq: 600, delay: 55 },
+            { id: 'forest-echo', name: 'Pine Forest Echo', cat: 'environments', pitch: 0, filterType: 'allpass', filterFreq: 1000, delay: 35 },
+            { id: 'sewer-pipe', name: 'Sewer Pipe System', cat: 'environments', pitch: -3, filterType: 'bandpass', filterFreq: 950, delay: 25 },
+
+            // Studio & FX (76-90)
+            { id: 'synth-vocal', name: 'Synthwave Vocal', cat: 'studio', pitch: 0, filterType: 'peaking', filterFreq: 2200, dist: 10 },
+            { id: 'bass-booster', name: 'Sub Bass Booster', cat: 'studio', pitch: -3, filterType: 'lowshelf', filterFreq: 250 },
+            { id: 'crystal-treble', name: 'Crystal Treble Boost', cat: 'studio', pitch: 2, filterType: 'highshelf', filterFreq: 4000 },
+            { id: 'heavy-dist', name: 'Heavy Metal Fuzz', cat: 'studio', pitch: 0, filterType: 'highpass', filterFreq: 600, dist: 80 },
+            { id: 'warm-tube', name: 'Warm Vacuum Tube', cat: 'studio', pitch: -1, filterType: 'lowpass', filterFreq: 3000, dist: 15 },
+            { id: 'radio-announcer', name: 'Radio Announcer', cat: 'studio', pitch: -2, filterType: 'peaking', filterFreq: 1800, dist: 8 },
+            { id: 'telephone-eq', name: 'Telephone Notch EQ', cat: 'studio', pitch: 0, filterType: 'notch', filterFreq: 1200 },
+            { id: 'shimmer-reverb', name: 'Shimmer Reverb', cat: 'studio', pitch: 2, filterType: 'highpass', filterFreq: 1500, delay: 35 },
+            { id: 'slapback-delay', name: 'Retro Slapback Delay', cat: 'studio', pitch: 0, filterType: 'allpass', filterFreq: 1000, delay: 10 },
+            { id: 'bitcrusher-8bit', name: '8-Bit Bitcrusher', cat: 'studio', pitch: 1, filterType: 'bandpass', filterFreq: 2500, dist: 70 },
+            { id: 'robot-vocoder', name: 'Robot Vocoder', cat: 'studio', pitch: 0, filterType: 'bandpass', filterFreq: 1600 },
+            { id: 'vibrato-wave', name: 'Vibrato Wave', cat: 'studio', pitch: 0, filterType: 'allpass', filterFreq: 1000 },
+            { id: 'lo-fi-hiphop', name: 'Lo-Fi Chill Hop', cat: 'studio', pitch: -1, filterType: 'lowpass', filterFreq: 1400 },
+            { id: 'sub-harmonic', name: 'Sub-Harmonic Drop', cat: 'studio', pitch: -8, filterType: 'lowpass', filterFreq: 350 },
+            { id: 'crisp-broadcast', name: 'Crisp Broadcast Mic', cat: 'studio', pitch: 0, filterType: 'highshelf', filterFreq: 3500 },
+
+            // Extreme FX (91-105)
+            { id: 'ring-mod-alien', name: 'Ring Mod Alien', cat: 'extreme', pitch: 3, filterType: 'bandpass', filterFreq: 2000, dist: 40 },
+            { id: 'stutter-machine', name: 'Stutter Machine', cat: 'extreme', pitch: 0, filterType: 'allpass', filterFreq: 1000, delay: 15 },
+            { id: 'laser-siren', name: 'Cyber Laser Siren', cat: 'extreme', pitch: 5, filterType: 'peaking', filterFreq: 3000 },
+            { id: 'freq-inverter', name: 'Frequency Inverter', cat: 'extreme', pitch: -5, filterType: 'notch', filterFreq: 1800, dist: 65 },
+            { id: 'cosmic-phaser', name: 'Cosmic Phaser', cat: 'extreme', pitch: 0, filterType: 'allpass', filterFreq: 1000, delay: 20 },
+            { id: 'deep-crush', name: 'Deep Space Crush', cat: 'extreme', pitch: -9, filterType: 'lowpass', filterFreq: 400, dist: 85 },
+            { id: 'hyper-drive', name: 'Hyper Drive Surge', cat: 'extreme', pitch: 6, filterType: 'highpass', filterFreq: 2200, dist: 50 },
+            { id: 'reverse-grain', name: 'Reverse Granulator', cat: 'extreme', pitch: -2, filterType: 'allpass', filterFreq: 1000, delay: 40 },
+            { id: 'glitch-core', name: 'Glitch-Core Glitch', cat: 'extreme', pitch: 4, filterType: 'bandpass', filterFreq: 1900, dist: 75 },
+            { id: 'nuclear-siren', name: 'Nuclear Siren', cat: 'extreme', pitch: 5, filterType: 'highpass', filterFreq: 2500 },
+            { id: 'plasma-beam', name: 'Plasma Beam', cat: 'extreme', pitch: 2, filterType: 'peaking', filterFreq: 2800 },
+            { id: 'sub-zero', name: 'Sub-Zero Freeze', cat: 'extreme', pitch: -7, filterType: 'lowpass', filterFreq: 450, delay: 30 },
+            { id: 'black-hole', name: 'Black Hole Singularity', cat: 'extreme', pitch: -12, filterType: 'lowpass', filterFreq: 300, dist: 40, delay: 50 },
+            { id: 'cyber-demon', name: 'Cyber Demon Prime', cat: 'extreme', pitch: -10, filterType: 'lowpass', filterFreq: 500, dist: 70 },
+            { id: 'overdrive-max', name: 'Overdrive Maximum', cat: 'extreme', pitch: 0, filterType: 'highpass', filterFreq: 1000, dist: 95 }
+        ];
+
+        let activePreset = PRESETS[0];
+        let micStream = null;
+        let micAudioCtx = null;
+        let micSource = null;
+        
+        // Audio processing nodes
+        let gainNode = null;
+        let pitchShiftNode = null;
+        let filterNode = null;
+        let distNode = null;
+        let delayNode = null;
+        let feedbackNode = null;
+        let eqBass = null;
+        let eqMid = null;
+        let eqTreble = null;
+        let monitorGain = null;
+        let analyserNode = null;
+        
+        // Recording & Speech state
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let speechRecognition = null;
+        let isMicEnabled = false;
+        let isRecording = false;
+        let isMonitoring = false;
+        let visualizerMode = 'bars';
+    </script>
+
+    <script>
+        /* POPULATE PRESET MATRIX GRID */
+        function populatePresets(list = PRESETS) {
+            const container = document.getElementById('presets-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            list.forEach(preset => {
+                const btn = document.createElement('button');
+                btn.className = `preset-btn p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-left hover:border-amber-500/50 transition-all flex flex-col justify-between h-16 ${preset.id === activePreset.id ? 'active' : ''}`;
+                btn.onclick = () => selectPreset(preset, btn);
+                btn.innerHTML = `
+                    <span class="text-xs font-tech font-bold truncate ${preset.id === activePreset.id ? 'text-slate-950' : 'text-slate-200'}">${preset.name}</span>
+                    <div class="flex items-center justify-between text-[10px] font-tech opacity-80">
+                        <span class="uppercase">${preset.cat}</span>
+                        <span>${preset.pitch > 0 ? '+' : ''}${preset.pitch}st</span>
+                    </div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function filterPresets() {
+            const query = document.getElementById('preset-search').value.toLowerCase();
+            const cat = document.getElementById('category-filter').value;
+
+            const filtered = PRESETS.filter(p => {
+                const matchSearch = p.name.toLowerCase().includes(query) || p.cat.toLowerCase().includes(query);
+                const matchCat = cat === 'all' || p.cat === cat;
+                return matchSearch && matchCat;
+            });
+            populatePresets(filtered);
+        }
+
+        function selectPreset(preset, btnElement) {
+            activePreset = preset;
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+            document.getElementById('active-preset-name').innerText = preset.name;
+
+            // Update sliders according to preset defaults
+            document.getElementById('slider-pitch').value = preset.pitch || 0;
+            document.getElementById('val-pitch').innerText = (preset.pitch || 0) + ' st';
+
+            document.getElementById('slider-delay').value = preset.delay || 0;
+            document.getElementById('val-delay').innerText = (preset.delay || 0) + '%';
+
+            document.getElementById('slider-dist').value = preset.dist || 0;
+            document.getElementById('val-dist').innerText = (preset.dist || 0) + '%';
+
+            if (isMicEnabled) {
+                applyAudioPipeline();
+            }
+            showToast(`Loaded voice preset: ${preset.name}`);
+        }
+
+        /* WEB AUDIO LIVE MIC PIPELINE INITIALIZATION */
+        async function toggleMicrophone() {
+            const btnText = document.getElementById('mic-btn-text');
+            const mainIcon = document.getElementById('mic-main-icon');
+            const recBtn = document.getElementById('record-btn');
+
+            if (!isMicEnabled) {
+                try {
+                    micStream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: { 
+                            echoCancellation: true, 
+                            noiseSuppression: true, 
+                            autoGainControl: true 
+                        } 
+                    });
+                    
+                    micAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (micAudioCtx.state === 'suspended') {
+                        await micAudioCtx.resume();
+                    }
+
+                    // Update Diagnostic Specs
+                    document.getElementById('diag-sample-rate').innerText = (micAudioCtx.sampleRate / 1000).toFixed(1) + ' kHz';
+                    document.getElementById('diag-snr').innerText = '42 dB';
+
+                    micSource = micAudioCtx.createMediaStreamSource(micStream);
+                    analyserNode = micAudioCtx.createAnalyser();
+                    analyserNode.fftSize = 256;
+
+                    setupAudioNodes();
+                    applyAudioPipeline();
+                    startVisualizer();
+                    initSpeechRecognition();
+
+                    isMicEnabled = true;
+                    btnText.innerText = 'STOP MIC ENGINE';
+                    mainIcon.className = 'fa-solid fa-microphone-slash text-base';
+                    recBtn.disabled = false;
+                    recBtn.className = 'px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-tech font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-red-600/20 transition-all flex items-center gap-2 cursor-pointer';
+
+                    document.getElementById('visualizer-placeholder').style.display = 'none';
+                    showToast("Microphone Engine LIVE! Speak into your mic.");
+
+                } catch (err) {
+                    showToast("Microphone Access Error: " + err.message);
+                }
+            } else {
+                if (micStream) micStream.getTracks().forEach(track => track.stop());
+                if (speechRecognition) speechRecognition.stop();
+                isMicEnabled = false;
+                btnText.innerText = 'ENABLE MIC ENGINE';
+                mainIcon.className = 'fa-solid fa-microphone text-base';
+                recBtn.disabled = true;
+                recBtn.className = 'px-6 py-3 bg-slate-800 border border-slate-700 text-slate-500 font-tech font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 cursor-not-allowed';
+                document.getElementById('visualizer-placeholder').style.display = 'block';
+                document.getElementById('diag-snr').innerText = '-- dB';
+                showToast("Microphone stopped.");
+            }
+        }
+
+        function setupAudioNodes() {
+            gainNode = micAudioCtx.createGain();
+            filterNode = micAudioCtx.createBiquadFilter();
+            distNode = micAudioCtx.createWaveShaper();
+            delayNode = micAudioCtx.createDelay(1.0);
+            feedbackNode = micAudioCtx.createGain();
+
+            // 3-Band Equalizer
+            eqBass = micAudioCtx.createBiquadFilter();
+            eqBass.type = 'lowshelf';
+            eqBass.frequency.value = 250;
+
+            eqMid = micAudioCtx.createBiquadFilter();
+            eqMid.type = 'peaking';
+            eqMid.frequency.value = 1500;
+            eqMid.Q.value = 1.0;
+
+            eqTreble = micAudioCtx.createBiquadFilter();
+            eqTreble.type = 'highshelf';
+            eqTreble.frequency.value = 4000;
+
+            // Monitor Gain (For local playback headphones)
+            monitorGain = micAudioCtx.createGain();
+            monitorGain.gain.value = isMonitoring ? 0.8 : 0.0;
+        }
+
+        function applyAudioPipeline() {
+            if (!micAudioCtx) return;
+
+            try { micSource.disconnect(); } catch(e){}
+
+            // Set Gain
+            const gainVal = parseFloat(document.getElementById('slider-gain').value) / 100;
+            gainNode.gain.value = gainVal;
+
+            // Set Filter
+            filterNode.type = activePreset.filterType || 'allpass';
+            filterNode.frequency.value = activePreset.filterFreq || 1000;
+
+            // Set Distortion
+            const distVal = parseFloat(document.getElementById('slider-dist').value);
+            if (distVal > 0) {
+                const k = distVal * 5;
+                const n_samples = 44100;
+                const curve = new Float32Array(n_samples);
+                const deg = Math.PI / 180;
+                for (let i = 0; i < n_samples; ++i) {
+                    let x = (i * 2) / n_samples - 1;
+                    curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+                }
+                distNode.curve = curve;
+            } else {
+                distNode.curve = null;
+            }
+
+            // Set Delay
+            const delayTime = (parseFloat(document.getElementById('slider-delay').value) / 100) * 0.4;
+            delayNode.delayTime.value = delayTime;
+            feedbackNode.gain.value = delayTime > 0 ? 0.4 : 0;
+
+            // Set EQ
+            eqBass.gain.value = parseFloat(document.getElementById('slider-bass').value);
+            eqMid.gain.value = parseFloat(document.getElementById('slider-mid').value);
+            eqTreble.gain.value = parseFloat(document.getElementById('slider-treble').value);
+
+            // Connect Chain: Mic -> Gain -> Filter -> Dist -> EQ Bass -> Mid -> Treble -> Analyser
+            micSource.connect(gainNode);
+            gainNode.connect(filterNode);
+            filterNode.connect(distNode);
+            distNode.connect(eqBass);
+            eqBass.connect(eqMid);
+            eqMid.connect(eqTreble);
+
+            // Delay Feedback Loop
+            if (delayTime > 0) {
+                eqTreble.connect(delayNode);
+                delayNode.connect(feedbackNode);
+                feedbackNode.connect(delayNode);
+                delayNode.connect(analyserNode);
+            }
+
+            eqTreble.connect(analyserNode);
+            
+            // Monitor local output (Headphones recommended)
+            analyserNode.connect(monitorGain);
+            monitorGain.connect(micAudioCtx.destination);
+        }
+
+        /* LIVE PARAMETER UPDATES FROM SLIDERS */
+        function updateMixerNode(type, value) {
+            if (type === 'pitch') {
+                document.getElementById('val-pitch').innerText = value + ' st';
+            } else if (type === 'gain') {
+                document.getElementById('val-gain').innerText = value + '%';
+            } else if (type === 'bass') {
+                document.getElementById('val-bass').innerText = value + ' dB';
+            } else if (type === 'mid') {
+                document.getElementById('val-mid').innerText = value + ' dB';
+            } else if (type === 'treble') {
+                document.getElementById('val-treble').innerText = value + ' dB';
+            } else if (type === 'delay') {
+                document.getElementById('val-delay').innerText = value + '%';
+            } else if (type === 'dist') {
+                document.getElementById('val-dist').innerText = value + '%';
+            }
+
+            if (isMicEnabled) applyAudioPipeline();
+        }
+
+        function resetMixerDefaults() {
+            document.getElementById('slider-pitch').value = 0;
+            document.getElementById('val-pitch').innerText = '0 st';
+            document.getElementById('slider-gain').value = 100;
+            document.getElementById('val-gain').innerText = '100%';
+            document.getElementById('slider-bass').value = 0;
+            document.getElementById('val-bass').innerText = '0 dB';
+            document.getElementById('slider-mid').value = 0;
+            document.getElementById('val-mid').innerText = '0 dB';
+            document.getElementById('slider-treble').value = 0;
+            document.getElementById('val-treble').innerText = '0 dB';
+            document.getElementById('slider-delay').value = 0;
+            document.getElementById('val-delay').innerText = '0%';
+            document.getElementById('slider-dist').value = 0;
+            document.getElementById('val-dist').innerText = '0%';
+
+            if (isMicEnabled) applyAudioPipeline();
+            showToast("Mixer settings reset to flat baseline.");
+        }
+
+        function toggleMonitoring() {
+            isMonitoring = document.getElementById('monitor-toggle').checked;
+            if (monitorGain) {
+                monitorGain.gain.value = isMonitoring ? 0.8 : 0.0;
+            }
+            if (isMonitoring) {
+                showToast("Live Mic Monitoring ON! Wear headphones to prevent echo.");
+            }
+        }
+
+        /* MULTI-MODE AUDIO VISUALIZER (BARS, WAVEFORM, RADIAL) */
+        function setVisMode(mode) {
+            visualizerMode = mode;
+            ['bars', 'wave', 'radial'].forEach(m => {
+                const btn = document.getElementById('vis-btn-' + m);
+                if (m === mode) {
+                    btn.className = 'px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500 text-slate-950';
+                } else {
+                    btn.className = 'px-2 py-0.5 text-[10px] font-bold rounded text-slate-400 hover:text-white';
+                }
+            });
+        }
+
+        function startVisualizer() {
+            const canvas = document.getElementById('visualizer-canvas');
+            const ctx = canvas.getContext('2d');
+            const bufferLength = analyserNode.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            const timeDataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                if (!isMicEnabled) return;
+                requestAnimationFrame(draw);
+
+                analyserNode.getByteFrequencyData(dataArray);
+                analyserNode.getByteTimeDomainData(timeDataArray);
+
+                // Calculate VU meter volume
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    const norm = (dataArray[i] - 128) / 128;
+                    sum += dataArray[i];
+                }
+                const avgVol = Math.round((sum / bufferLength) / 255 * 100);
+                document.getElementById('vu-bar').style.width = avgVol + '%';
+                document.getElementById('vu-value').innerText = avgVol > 0 ? `-${100 - avgVol} dB` : '-100 dB';
+
+                ctx.fillStyle = '#030712';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                if (visualizerMode === 'bars') {
+                    const barWidth = (canvas.width / bufferLength) * 2.2;
+                    let x = 0;
+                    for (let i = 0; i < bufferLength; i++) {
+                        const barHeight = (dataArray[i] / 255) * canvas.height;
+                        const grad = ctx.createLinearGradient(0, canvas.height, 0, 0);
+                        grad.addColorStop(0, '#f59e0b');
+                        grad.addColorStop(1, '#22d3ee');
+                        ctx.fillStyle = grad;
+                        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                        x += barWidth + 1;
+                    }
+                } else if (visualizerMode === 'wave') {
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.beginPath();
+                    const sliceWidth = canvas.width * 1.0 / bufferLength;
+                    let x = 0;
+                    for (let i = 0; i < bufferLength; i++) {
+                        const v = timeDataArray[i] / 128.0;
+                        const y = v * canvas.height / 2;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                        x += sliceWidth;
+                    }
+                    ctx.lineTo(canvas.width, canvas.height / 2);
+                    ctx.stroke();
+                } else if (visualizerMode === 'radial') {
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    const radius = 35;
+
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    for (let i = 0; i < bufferLength; i += 2) {
+                        const angle = (i / bufferLength) * Math.PI * 2;
+                        const barLen = (dataArray[i] / 255) * 50;
+                        const x1 = centerX + Math.cos(angle) * radius;
+                        const y1 = centerY + Math.sin(angle) * radius;
+                        const x2 = centerX + Math.cos(angle) * (radius + barLen);
+                        const y2 = centerY + Math.sin(angle) * (radius + barLen);
+
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.strokeStyle = '#06b6d4';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                }
+            }
+            draw();
+        }
+
+        /* INSTANT SYNTHESIZED SOUNDBOARD FX */
+        function playSoundFX(type) {
+            const ctx = micAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            if (ctx.state === 'suspended') ctx.resume();
+
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+
+            if (analyserNode && isMicEnabled) {
+                gain.connect(analyserNode);
+            } else {
+                gain.connect(ctx.destination);
+            }
+
+            const now = ctx.currentTime;
+
+            if (type === 'airhorn') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(466.16, now);
+                osc.frequency.setValueAtTime(466.16, now + 0.1);
+                osc.frequency.setValueAtTime(622.25, now + 0.15);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                osc.start(now); osc.stop(now + 0.6);
+            } else if (type === 'laser') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'cyber') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(1500, now + 0.4);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now); osc.stop(now + 0.4);
+            } else if (type === 'gameover') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.setValueAtTime(250, now + 0.15);
+                osc.frequency.setValueAtTime(200, now + 0.3);
+                osc.frequency.setValueAtTime(150, now + 0.45);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+                osc.start(now); osc.stop(now + 0.7);
+            } else if (type === 'applause' || type === 'cheer') {
+                // Noise buffer cheer simulation
+                const bufferSize = ctx.sampleRate * 0.8;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const noiseFilter = ctx.createBiquadFilter();
+                noiseFilter.type = 'bandpass';
+                noiseFilter.frequency.value = 1000;
+                noise.connect(noiseFilter);
+                noiseFilter.connect(gain);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                noise.start(now);
+                return;
+            } else if (type === 'drumroll') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(120, now);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now); osc.stop(now + 0.5);
+            } else if (type === 'glitch') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.setValueAtTime(200, now + 0.05);
+                osc.frequency.setValueAtTime(1400, now + 0.1);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now); osc.stop(now + 0.25);
+            }
+            showToast(`Triggered Sound FX: ${type.toUpperCase()}`);
+        }
+
+        /* LIVE SPEECH RECOGNITION SUBTITLES */
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                document.getElementById('subtitle-box').innerText = "Live AI Speech Recognition not supported in this browser version.";
+                return;
+            }
+
+            speechRecognition = new SpeechRecognition();
+            speechRecognition.continuous = true;
+            speechRecognition.interimResults = true;
+
+            speechRecognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                const box = document.getElementById('subtitle-box');
+                if (finalTranscript || interimTranscript) {
+                    box.innerHTML = `<p class="text-white"><span class="text-amber-400 font-bold">[${activePreset.name}]:</span> ${finalTranscript} <span class="text-slate-500">${interimTranscript}</span></p>`;
+                    box.scrollTop = box.scrollHeight;
+                }
+            };
+
+            speechRecognition.start();
+        }
+
+        function copySubtitles() {
+            const text = document.getElementById('subtitle-box').innerText;
+            document.execCommand('copy');
+            showToast('Subtitles copied to clipboard!');
+        }
+
+        function clearSubtitles() {
+            document.getElementById('subtitle-box').innerHTML = '<p class="text-slate-600 text-xs italic font-tech font-bold">Transcribed speech transcript cleared...</p>';
+        }
+
+        /* RECORDING & GALLERY FUNCTIONS */
+        function toggleRecording() {
+            const recBtnText = document.getElementById('record-btn-text');
+            const recIcon = document.getElementById('record-icon');
+
+            if (!isRecording) {
+                recordedChunks = [];
+                const dest = micAudioCtx.createMediaStreamDestination();
+                analyserNode.connect(dest);
+
+                mediaRecorder = new MediaRecorder(dest.stream);
+                mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+                mediaRecorder.onstop = saveRecordingToGallery;
+                mediaRecorder.start();
+
+                isRecording = true;
+                recBtnText.innerText = 'STOP & SAVE';
+                recIcon.className = 'fa-solid fa-square text-white text-xs animate-pulse';
+                showToast("Recording started...");
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                recBtnText.innerText = 'REC AUDIO';
+                recIcon.className = 'fa-solid fa-circle text-red-500 text-xs';
+            }
+        }
+
+        function saveRecordingToGallery() {
+            const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+            const url = URL.createObjectURL(blob);
+            const saved = JSON.parse(localStorage.getItem('inspeaker_gallery') || '[]');
+
+            const newClip = {
+                id: Date.now(),
+                title: `Voice Clip #${saved.length + 1}`,
+                preset: activePreset.name,
+                url: url,
+                date: new Date().toLocaleTimeString()
+            };
+
+            saved.unshift(newClip);
+            localStorage.setItem('inspeaker_gallery', JSON.stringify(saved));
+            renderGallery();
+            document.getElementById('saved-count').innerText = saved.length;
+            showToast(`Audio clip saved with modulator "${activePreset.name}"!`);
+        }
+
+        function renderGallery() {
+            const container = document.getElementById('gallery-container');
+            const saved = JSON.parse(localStorage.getItem('inspeaker_gallery') || '[]');
+            document.getElementById('saved-count').innerText = saved.length;
+
+            if (saved.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-16 glass-card rounded-3xl space-y-3">
+                        <i class="fa-solid fa-file-audio text-slate-700 text-4xl"></i>
+                        <h3 class="text-white font-tech font-bold text-lg">No Audio Recordings Saved Yet</h3>
+                        <p class="text-slate-500 text-xs max-w-sm mx-auto">Go to "Mic Arena", record your voice using any modulator or FX combo, and save it here.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            saved.forEach(clip => {
+                const card = document.createElement('div');
+                card.className = 'glass-card p-5 rounded-3xl space-y-3 border-slate-800';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-xs font-tech">
+                        <span class="text-amber-400 font-bold">${clip.title}</span>
+                        <span class="text-slate-500">${clip.date}</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-300 font-tech">MODULATOR: <strong>${clip.preset}</strong></span>
+                    </div>
+                    <audio controls src="${clip.url}" class="w-full h-8"></audio>
+                    <div class="flex justify-end gap-2 text-xs font-tech pt-1">
+                        <a href="${clip.url}" download="${clip.title}.webm" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg">
+                            <i class="fa-solid fa-download mr-1"></i> Download
+                        </a>
+                        <button onclick="deleteClip(${clip.id})" class="px-3 py-1.5 bg-slate-900 hover:bg-red-500/20 text-red-400 rounded-lg">
+                            <i class="fa-solid fa-trash mr-1"></i> Delete
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deleteClip(id) {
+            let saved = JSON.parse(localStorage.getItem('inspeaker_gallery') || '[]');
+            saved = saved.filter(c => c.id !== id);
+            localStorage.setItem('inspeaker_gallery', JSON.stringify(saved));
+            renderGallery();
+            showToast("Clip removed from gallery.");
+        }
+
+        function clearAllGallery() {
+            localStorage.removeItem('inspeaker_gallery');
+            renderGallery();
+            showToast("All clips cleared.");
+        }
+    </script>
+</body>
+</html>
